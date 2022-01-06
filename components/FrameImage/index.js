@@ -4,7 +4,7 @@ import { fabric } from 'fabric';
 import { useRef } from 'react';
 import * as htmlToImage from 'html-to-image';
 import { saveAs } from 'file-saver';
-import { toPng, toJpeg, toBlob, toPixelData, toSvg } from 'html-to-image';
+// import { toPng, toJpeg, toBlob, toPixelData, toSvg } from 'html-to-image';
 function FrameImage() {
   const fileRef = useRef();
   const { editor, onReady } = useFabricJSEditor();

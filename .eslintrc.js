@@ -6,9 +6,6 @@ const prettierOptions = JSON.parse(
 );
 
 module.exports = {
-  parser: 'babel-eslint',
-  extends: ['airbnb', 'prettier'],
-  plugins: ['prettier', 'react', 'jsx-a11y'],
   env: {
     jest: true,
     browser: true,
@@ -22,8 +19,13 @@ module.exports = {
       jsx: true,
     },
   },
+  extends: [
+    'plugin:react/recommended',
+    'next',
+    'plugin:@next/next/recommended',
+    'prettier',
+  ],
   rules: {
-    'prettier/prettier': ['error', prettierOptions],
     'arrow-body-style': [2, 'as-needed'],
     'class-methods-use-this': 0,
     'import/imports-first': 0,
@@ -77,8 +79,6 @@ module.exports = {
     'react/prop-types': 0,
     'react/no-typos': 0,
     'react/no-array-index-key': 0,
-    'redux-saga/no-yield-in-race': 2,
-    'redux-saga/yield-effects': 2,
     'require-yield': 0,
     'no-param-reassign': 0,
     'no-unused-expressions': 0,
