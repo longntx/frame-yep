@@ -1,5 +1,5 @@
 import { FabricJSCanvas, useFabricJSEditor } from 'fabricjs-react';
-import { useMemoizedFn } from 'ahooks';
+import { useMemoizedFn, useDebounceFn } from 'ahooks';
 import { fabric } from 'fabric';
 import { useRef } from 'react';
 import * as htmlToImage from 'html-to-image';
@@ -32,15 +32,22 @@ function FrameImage() {
       fileRef.current = null;
     }
   });
-  const downloadFile = (fileRef) => {
+
+  const { run: downloadFile } = useDebounceFn((fileRef) => {
+    const canvas = editor?.canvas;
+    canvas.discardActiveObject();
+    canvas.requestRenderAll();
+    console.log(1);
     if (fileRef && fileRef.current) {
-      htmlToImage
-        .toBlob(document.getElementById('avatar'))
-        .then(function (blob) {
-          saveAs(blob, `avatar-${new Date().valueOf()}.png`);
-        });
+      setTimeout(() => {
+        htmlToImage
+          .toBlob(document.getElementById('avatar'))
+          .then(function (blob) {
+            saveAs(blob, `avatar-${new Date().valueOf()}.png`);
+          });
+      });
     }
-  };
+  });
   return (
     <>
       <div className="container mx-auto p-20">
