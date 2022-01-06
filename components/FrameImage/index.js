@@ -12,6 +12,7 @@ function FrameImage() {
     if (e?.target.files && e?.target.files[0]) {
       editor?.deleteAll();
       const file = e?.target.files[0];
+      fileRef.current = file;
       const reader = new FileReader();
       reader.onload = function (event) {
         const imgObj = new Image();
@@ -23,14 +24,16 @@ function FrameImage() {
           const canvas = editor?.canvas;
           canvas.centerObject(image);
           canvas.add(image);
-          fileRef.current = image;
         };
       };
       reader.readAsDataURL(file);
+    } else {
+      editor?.deleteAll();
+      fileRef.current = null;
     }
   });
-  const downloadFile = (file) => {
-    if (file) {
+  const downloadFile = (fileRef) => {
+    if (fileRef && fileRef.current) {
       htmlToImage
         .toBlob(document.getElementById('avatar'))
         .then(function (blob) {
