@@ -1,11 +1,8 @@
 import { FabricJSCanvas, useFabricJSEditor } from 'fabricjs-react';
-import { useMemoizedFn, useDebounceFn } from 'ahooks';
+import { useDebounceFn, useMemoizedFn } from 'ahooks';
 import { fabric } from 'fabric';
 import { useRef } from 'react';
-import * as htmlToImage from 'html-to-image';
 import html2canvas from 'html2canvas';
-import { saveAs } from 'file-saver';
-// import { toPng, toJpeg, toBlob, toPixelData, toSvg } from 'html-to-image';
 function FrameImage() {
   const fileRef = useRef();
   const { editor, onReady } = useFabricJSEditor();
@@ -38,14 +35,8 @@ function FrameImage() {
     const canvas = editor?.canvas;
     canvas.discardActiveObject();
     canvas.requestRenderAll();
-    console.log(1);
     if (fileRef && fileRef.current) {
       setTimeout(() => {
-        // htmlToImage
-        //   .toBlob(document.getElementById('avatar'))
-        //   .then(function (blob) {
-        //     saveAs(blob, `avatar-${new Date().valueOf()}.png`);
-        //   });
         html2canvas(document.getElementById('avatar'), {
           useCORS: true
         }).then((c) => {
