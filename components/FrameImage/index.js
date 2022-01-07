@@ -43,7 +43,7 @@ function FrameImage() {
           const img = c.toDataURL("image/png", 1.0);
           downloadImage(img, `avatar-${new Date().valueOf()}.png`);
         })
-      });
+      }, 150);
     }
   });
 
