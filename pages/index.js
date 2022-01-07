@@ -6,7 +6,9 @@ const LazyFrameImage = dynamic(() => import('../components/FrameImage'), {
 function HomePage() {
   return (
     <>
-      <LazyFrameImage />
+      <div className="container mx-auto h-100 flex align-center justify-center flex-col">
+        <LazyFrameImage />
+      </div>
     </>
   );
 }

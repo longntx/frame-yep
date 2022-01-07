@@ -7,6 +7,10 @@
 }
 
 @layer components {
+  .container {
+    min-height: 760px;
+    height: 100vh;
+  }
   .frame {
     @apply w-480 h-480 bg-sky-500/[.06];
     background-image: url(../public/images/Frame_Facebook_YEPEst2021-03.png);
