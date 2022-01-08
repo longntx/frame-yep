@@ -2,7 +2,7 @@ import { useFabricJSEditor } from 'fabricjs-react';
 import React, { useRef, useState } from 'react';
 import { useDebounceFn, useMemoizedFn } from 'ahooks';
 import { fabric } from 'fabric';
-import html2canvas from 'html2canvas';
+// import html2canvas from 'html2canvas';
 import * as htmlToImage from 'html-to-image';
 import { saveAs } from 'file-saver';
 import Canvas from '../Canvas';
@@ -67,14 +67,14 @@ function FrameImage() {
     }
   });
 
-  const downloadImage = (data, filename = 'untitled.jpeg') => {
-    const a = document.createElement('a');
-    a.href = data;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    a.parentNode.removeChild(a);
-  };
+  // const downloadImage = (data, filename = 'untitled.jpeg') => {
+  //   const a = document.createElement('a');
+  //   a.href = data;
+  //   a.download = filename;
+  //   document.body.appendChild(a);
+  //   a.click();
+  //   a.parentNode.removeChild(a);
+  // };
 
   return (
     <div className="h-screen flex justify-center items-center">
