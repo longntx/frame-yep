@@ -18,9 +18,9 @@
     pointer-events: none;
     z-index: 11;
   }
-  .RSframe{
+  .rs-frame{
     @apply bg-sky-500/[.06];
-    background-image: url(../public/images/Rising.png);
+    background-image: url(../public/images/Frame_Facebook_YEPEst2021-05.png);
     background-size: contain;
     pointer-events: none;
     z-index: 11;
