@@ -30,7 +30,7 @@ function FrameImage() {
     }
   });
 
-  const addImageToCanvasFromUrl = (editorObj, url) => {
+  const addImageToCanvasFromUrl = (editorObj, url, isDownloading) => {
     const imgObj = new Image();
     imgObj.src = url;
     imgObj.onload = function () {
@@ -40,16 +40,7 @@ function FrameImage() {
       image.scaleToWidth(canvas.getWidth());
       canvas.centerObject(image);
       canvas.add(image);
-    };
-  };
-
-  const { run: generateDownloadLink } = useDebounceFn((fileRef) => {
-    const canvas = editor?.canvas;
-    canvas.discardActiveObject();
-    canvas.requestRenderAll();
-    addImageToCanvasFromUrl(editor, backgroundRef.current);
-    if (fileRef && fileRef.current) {
-      setTimeout(() => {
+      if (isDownloading) {
         const dataUrl = canvas.toDataURL({
           format: 'png',
           multiplier: 720 / canvas.width,
@@ -62,7 +53,19 @@ function FrameImage() {
           saveAs(dataUrl, `avatar-${new Date().valueOf()}.png`);
         }
         removeLastObjects();
-      }, 500);
+      }
+    };
+  };
+
+  const { run: generateDownloadLink } = useDebounceFn((fileRef) => {
+    const canvas = editor?.canvas;
+    canvas.discardActiveObject();
+    canvas.requestRenderAll();
+
+    if (fileRef && fileRef.current) {
+      setTimeout(() => {
+        addImageToCanvasFromUrl(editor, backgroundRef.current, true);
+      }, 200);
     }
   });
 
