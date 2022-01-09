@@ -2,13 +2,13 @@ import { useFabricJSEditor } from 'fabricjs-react';
 import React, { useRef, useState } from 'react';
 import { useDebounceFn, useMemoizedFn } from 'ahooks';
 import { fabric } from 'fabric';
-// import html2canvas from 'html2canvas';
-import * as htmlToImage from 'html-to-image';
-import { saveAs } from 'file-saver';
 import Canvas from '../Canvas';
 
 function FrameImage() {
+  const ER_BACKGROUND = 'images/1080_Frame_Facebook_YEPEst2021-03.png';
+  const RS_BACKGROUND = 'images/1080_Frame_Facebook_YEPEst2021-05.png';
   const fileRef = useRef();
+  const backgroundRef = useRef(ER_BACKGROUND);
   const { editor, onReady } = useFabricJSEditor();
   const [ErBackground, setErBackground] = useState(true);
   const largeScreenClass = 'lg:w-[480px] md:w-[480px]';
@@ -20,16 +20,7 @@ function FrameImage() {
       fileRef.current = file;
       const reader = new FileReader();
       reader.onload = function (event) {
-        const imgObj = new Image();
-        imgObj.src = event.target.result;
-        imgObj.onload = function () {
-          const image = new fabric.Image(imgObj);
-          const canvas = editor?.canvas;
-          image.scaleToHeight(canvas.getHeight());
-          image.scaleToWidth(canvas.getWidth());
-          canvas.centerObject(image);
-          canvas.add(image);
-        };
+        addImageToCanvasFromUrl(editor, event.target.result);
       };
       reader.readAsDataURL(file);
     } else {
@@ -38,43 +29,47 @@ function FrameImage() {
     }
   });
 
+  const addImageToCanvasFromUrl = (editorObj, url) => {
+    const imgObj = new Image();
+    imgObj.src = url;
+    imgObj.onload = function () {
+      const image = new fabric.Image(imgObj);
+      const canvas = editorObj?.canvas;
+      image.scaleToHeight(canvas.getHeight());
+      image.scaleToWidth(canvas.getWidth());
+      canvas.centerObject(image);
+      canvas.add(image);
+    };
+  };
+
   const { run: downloadFile } = useDebounceFn((fileRef) => {
     const canvas = editor?.canvas;
     canvas.discardActiveObject();
     canvas.requestRenderAll();
-    // if (fileRef && fileRef.current) {
-    //   setTimeout(() => {
-    //     html2canvas(document.getElementById('avatar'), {
-    //       useCORS: true,
-    //     }).then((c) => {
-    //       const img = c.toDataURL('image/png', 4.0);
-    //       downloadImage(img, `avatar-${new Date().valueOf()}.png`);
-    //     });
-    //   }, 150);
-    // }
+    addImageToCanvasFromUrl(editor, backgroundRef.current);
     if (fileRef && fileRef.current) {
       setTimeout(() => {
-        htmlToImage
-          .toBlob(document.getElementById('avatar'))
-          .then(function (blob) {
-            if (window.saveAs) {
-              window.saveAs(blob, `avatar-${new Date().valueOf()}.png`);
-            } else {
-              saveAs(blob, `avatar-${new Date().valueOf()}.png`);
-            }
-          });
+        const dataUrl = canvas.toDataURL({
+          format: 'png',
+          multiplier: 720 / canvas.width,
+          enableRetinaScaling: true,
+          selectable: false,
+        });
+        downloadImage(dataUrl, `avatar-${new Date().valueOf()}.png`);
+        const objects = canvas.getObjects();
+        canvas.remove(...[objects[1]]);
       }, 100);
     }
   });
 
-  // const downloadImage = (data, filename = 'untitled.jpeg') => {
-  //   const a = document.createElement('a');
-  //   a.href = data;
-  //   a.download = filename;
-  //   document.body.appendChild(a);
-  //   a.click();
-  //   a.parentNode.removeChild(a);
-  // };
+  const downloadImage = (data, filename = 'untitled.jpeg') => {
+    const a = document.createElement('a');
+    a.href = data;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.parentNode.removeChild(a);
+  };
 
   return (
     <div className="h-screen flex justify-center items-center">
@@ -88,6 +83,7 @@ function FrameImage() {
               className="hidden"
               defaultChecked
               onChange={(e) => {
+                backgroundRef.current = ER_BACKGROUND;
                 setErBackground(e.target.checked);
               }}
             />
@@ -104,6 +100,7 @@ function FrameImage() {
               name="employeeRole"
               className="hidden"
               onChange={(e) => {
+                backgroundRef.current = RS_BACKGROUND;
                 setErBackground(!e.target.checked);
               }}
             />
