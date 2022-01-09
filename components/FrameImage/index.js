@@ -1,5 +1,5 @@
 import { useFabricJSEditor } from 'fabricjs-react';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDebounceFn, useMemoizedFn } from 'ahooks';
 import { fabric } from 'fabric';
 import Canvas from '../Canvas';
@@ -11,6 +11,7 @@ function FrameImage() {
   const backgroundRef = useRef(ER_BACKGROUND);
   const { editor, onReady } = useFabricJSEditor();
   const [ErBackground, setErBackground] = useState(true);
+  const [downloadLink, setDownloadLink] = useState(null);
   const largeScreenClass = 'lg:w-[480px] md:w-[480px]';
   const smallScreenCLass = 'w-[380px] xsm:w-[300px] xx-sm:w-[250px]';
   const handleFileChange = useMemoizedFn((e) => {
@@ -21,9 +22,11 @@ function FrameImage() {
       const reader = new FileReader();
       reader.onload = function (event) {
         addImageToCanvasFromUrl(editor, event.target.result);
+        generateDownloadLink(fileRef);
       };
       reader.readAsDataURL(file);
     } else {
+      setDownloadLink(null);
       editor?.deleteAll();
       fileRef.current = null;
     }
@@ -42,7 +45,7 @@ function FrameImage() {
     };
   };
 
-  const { run: downloadFile } = useDebounceFn((fileRef) => {
+  const { run: generateDownloadLink } = useDebounceFn((fileRef) => {
     const canvas = editor?.canvas;
     canvas.discardActiveObject();
     canvas.requestRenderAll();
@@ -55,21 +58,14 @@ function FrameImage() {
           enableRetinaScaling: true,
           selectable: false,
         });
-        downloadImage(dataUrl, `avatar-${new Date().valueOf()}.png`);
+        setDownloadLink({
+          link: dataUrl,
+          filename: `avatar-${new Date().valueOf()}.png`,
+        });
         removeLastObjects();
-      }, 200);
+      });
     }
   });
-
-  const downloadImage = (data, filename = 'untitled.jpeg') => {
-    const a = document.createElement('a');
-    a.href = data;
-    a.download = filename;
-    a.target = 'blank';
-    document.body.appendChild(a);
-    a.click();
-    a.parentNode.removeChild(a);
-  };
 
   const removeLastObjects = () => {
     setTimeout(() => {
@@ -78,6 +74,37 @@ function FrameImage() {
       canvas.remove(...[objects[1]]);
     }, 200);
   };
+
+  useEffect(() => {
+    const canvas = editor?.canvas;
+    if (canvas) {
+      canvas.on('object:moving', function () {
+        setDownloadLink(null);
+      });
+      canvas.on('object:rotating', function () {
+        setDownloadLink(null);
+      });
+      canvas.on('object:scaling', function () {
+        generateDownloadLink(fileRef);
+      });
+      canvas.on('object:skewing', function () {
+        generateDownloadLink(fileRef);
+      });
+
+      canvas.on('object:moved', function () {
+        generateDownloadLink(fileRef);
+      });
+      canvas.on('object:rotated', function () {
+        generateDownloadLink(fileRef);
+      });
+      canvas.on('object:scaled', function () {
+        generateDownloadLink(fileRef);
+      });
+      canvas.on('object:skewed', function () {
+        generateDownloadLink(fileRef);
+      });
+    }
+  }, [editor?.canvas]);
 
   return (
     <div className="h-screen flex justify-center items-center">
@@ -142,12 +169,20 @@ function FrameImage() {
               />
             </label>
           </form>
-          <button
-            onClick={() => downloadFile(fileRef)}
-            className="bg-violet-400 hover:bg-violet-700 hover:text-white h-px-36 text-sm text-gray-500 text-violet-700 font-semibold py-2 px-4 rounded-full"
-          >
-            Download
-          </button>
+          {!downloadLink && (
+            <button className="bg-red-400 hover:bg-red-400 hover:text-white h-px-36 text-sm text-gray-500 text-violet-700 font-semibold py-2 px-4 rounded-full">
+              Download
+            </button>
+          )}
+          {downloadLink && (
+            <a
+              href={downloadLink?.link}
+              download={downloadLink.filename}
+              className="bg-violet-400 hover:bg-violet-700 hover:text-white h-px-36 text-sm text-gray-500 text-violet-700 font-semibold py-2 px-4 rounded-full"
+            >
+              Download
+            </a>
+          )}
         </div>
       </div>
     </div>
