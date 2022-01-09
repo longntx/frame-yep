@@ -40,7 +40,6 @@ function FrameImage() {
       image.scaleToWidth(canvas.getWidth());
       canvas.centerObject(image);
       canvas.add(image);
-      canvas.renderAll();
     };
   };
 
@@ -63,7 +62,7 @@ function FrameImage() {
           saveAs(dataUrl, `avatar-${new Date().valueOf()}.png`);
         }
         removeLastObjects();
-      }, 200);
+      }, 500);
     }
   });
 
