@@ -20,7 +20,7 @@
   }
   .rs-frame{
     @apply bg-sky-500/[.06];
-    background-image: url(../public/images/1080_Frame_Facebook_YEPEst2021-05.png);
+    background-image: url(../public/images/Frame_Facebook_YEPRS_1080px.png);
     background-size: contain;
     pointer-events: none;
     z-index: 11;
