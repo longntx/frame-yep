@@ -56,9 +56,8 @@ function FrameImage() {
           selectable: false,
         });
         downloadImage(dataUrl, `avatar-${new Date().valueOf()}.png`);
-        const objects = canvas.getObjects();
-        canvas.remove(...[objects[1]]);
-      }, 100);
+        removeLastObjects();
+      }, 200);
     }
   });
 
@@ -66,9 +65,18 @@ function FrameImage() {
     const a = document.createElement('a');
     a.href = data;
     a.download = filename;
+    a.target = 'blank';
     document.body.appendChild(a);
     a.click();
     a.parentNode.removeChild(a);
+  };
+
+  const removeLastObjects = () => {
+    setTimeout(() => {
+      const canvas = editor?.canvas;
+      const objects = canvas.getObjects();
+      canvas.remove(...[objects[1]]);
+    }, 200);
   };
 
   return (
