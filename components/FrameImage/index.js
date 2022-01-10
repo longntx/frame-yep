@@ -1,5 +1,5 @@
 import { useFabricJSEditor } from 'fabricjs-react';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDebounceFn, useMemoizedFn } from 'ahooks';
 import { fabric } from 'fabric';
 import Canvas from '../Canvas';
@@ -12,6 +12,7 @@ function FrameImage() {
   const backgroundRef = useRef(ER_BACKGROUND);
   const { editor, onReady } = useFabricJSEditor();
   const [ErBackground, setErBackground] = useState(true);
+  const [downloadableContent, setDownloadableContent] = useState(null);
   const largeScreenClass = 'lg:w-[480px] md:w-[480px]';
   const smallScreenCLass = 'w-[380px] xsm:w-[300px] xx-sm:w-[250px]';
   const handleFileChange = useMemoizedFn((e) => {
@@ -25,6 +26,7 @@ function FrameImage() {
       };
       reader.readAsDataURL(file);
     } else {
+      setDownloadableContent(null);
       editor?.deleteAll();
       fileRef.current = null;
     }
@@ -47,11 +49,10 @@ function FrameImage() {
           enableRetinaScaling: true,
           selectable: false,
         });
-        if (window.saveAs) {
-          window.saveAs(dataUrl, `avatar-${new Date().valueOf()}.png`);
-        } else {
-          saveAs(dataUrl, `avatar-${new Date().valueOf()}.png`);
-        }
+        setDownloadableContent({
+          link: dataUrl,
+          name: `avatar-${new Date().valueOf()}.png`,
+        });
         removeLastObjects();
       }
     };
@@ -63,9 +64,7 @@ function FrameImage() {
     canvas.requestRenderAll();
 
     if (fileRef && fileRef.current) {
-      setTimeout(() => {
-        addImageToCanvasFromUrl(editor, backgroundRef.current, true);
-      }, 200);
+      addImageToCanvasFromUrl(editor, backgroundRef.current, true);
     }
   });
 
@@ -75,6 +74,24 @@ function FrameImage() {
       canvas.remove(...[canvas.getObjects()[1]]);
     }, 100);
   };
+
+  useEffect(() => {
+    const canvas = editor?.canvas;
+    if (canvas) {
+      canvas.on('object:moving', function () {
+        setDownloadableContent(null);
+      });
+      canvas.on('object:rotating', function () {
+        setDownloadableContent(null);
+      });
+      canvas.on('object:scaling', function () {
+        setDownloadableContent(null);
+      });
+      canvas.on('object:skewing', function () {
+        setDownloadableContent(null);
+      });
+    }
+  }, [editor?.canvas]);
 
   return (
     <div className="h-screen flex justify-center items-center">
@@ -89,6 +106,7 @@ function FrameImage() {
               defaultChecked
               onChange={(e) => {
                 backgroundRef.current = ER_BACKGROUND;
+                setDownloadableContent(null);
                 setErBackground(e.target.checked);
               }}
             />
@@ -106,6 +124,7 @@ function FrameImage() {
               className="hidden"
               onChange={(e) => {
                 backgroundRef.current = RS_BACKGROUND;
+                setDownloadableContent(null);
                 setErBackground(!e.target.checked);
               }}
             />
@@ -139,26 +158,29 @@ function FrameImage() {
               />
             </label>
           </form>
-          <button
-            onClick={() => generateDownloadLink(fileRef)}
-            className="bg-violet-400 hover:bg-violet-400 hover:text-white h-px-36 text-sm text-gray-500 text-violet-700 font-semibold py-2 px-4 rounded-full"
-          >
-            Download
-          </button>
+          {!downloadableContent && (
+            <button
+              onClick={() => generateDownloadLink(fileRef)}
+              className="bg-violet-400 hover:bg-violet-400 hover:text-white h-px-36 text-sm text-gray-500 text-violet-700 font-semibold py-2 px-4 rounded-full"
+            >
+              Process
+            </button>
+          )}
           {/*{!downloadLink && (*/}
           {/*  <button className="bg-red-400 hover:bg-red-400 hover:text-white h-px-36 text-sm text-gray-500 text-violet-700 font-semibold py-2 px-4 rounded-full">*/}
           {/*    Download*/}
           {/*  </button>*/}
           {/*)}*/}
-          {/*{downloadLink && (*/}
-          {/*  <a*/}
-          {/*    href={downloadLink?.link}*/}
-          {/*    download={downloadLink.filename}*/}
-          {/*    className="bg-violet-400 hover:bg-violet-700 hover:text-white h-px-36 text-sm text-gray-500 text-violet-700 font-semibold py-2 px-4 rounded-full"*/}
-          {/*  >*/}
-          {/*    Download*/}
-          {/*  </a>*/}
-          {/*)}*/}
+          {downloadableContent && (
+            <button
+              onClick={() =>
+                saveAs(downloadableContent.link, downloadableContent.name)
+              }
+              className="bg-green-400 hover:bg-green-700 hover:text-white h-px-36 text-sm text-gray-500 text-violet-700 font-semibold py-2 px-4 rounded-full"
+            >
+              Download
+            </button>
+          )}
         </div>
       </div>
     </div>
