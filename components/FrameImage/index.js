@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useDebounceFn, useMemoizedFn } from 'ahooks';
 import { fabric } from 'fabric';
 import Canvas from '../Canvas';
+import axios from 'axios';
 import { saveAs } from 'file-saver';
 
 function FrameImage() {
@@ -16,6 +17,7 @@ function FrameImage() {
   const largeScreenClass = 'lg:w-[480px] md:w-[480px]';
   const smallScreenCLass = 'w-[380px] xsm:w-[300px] xx-sm:w-[250px]';
   const handleFileChange = useMemoizedFn((e) => {
+    setDownloadableContent(null);
     if (e?.target.files && e?.target.files[0]) {
       editor?.deleteAll();
       const file = e?.target.files[0];
@@ -26,7 +28,6 @@ function FrameImage() {
       };
       reader.readAsDataURL(file);
     } else {
-      setDownloadableContent(null);
       editor?.deleteAll();
       fileRef.current = null;
     }
@@ -92,6 +93,40 @@ function FrameImage() {
       });
     }
   }, [editor?.canvas]);
+
+  // function downloadBlob(blobUrl, name = 'file.txt') {
+  //   // Convert your blob into a Blob URL (a special url that points to an object in the browser's memory)
+  //
+  //   // Create a link element
+  //   const link = document.createElement('a');
+  //
+  //   // Set link's href to point to the Blob URL
+  //   link.href = blobUrl;
+  //   link.download = name;
+  //   link.style.cursor = 'pointer';
+  //
+  //   // Append link to the body
+  //   document.body.appendChild(link);
+  //
+  //   // Dispatch click event on the link
+  //   // This is necessary as link.click() does not work on the latest firefox
+  //   link.dispatchEvent(
+  //     new MouseEvent('touchstart', {
+  //       bubbles: true,
+  //       cancelable: true,
+  //       view: window,
+  //     }),
+  //   );
+  //
+  //   // Remove link from body
+  //   document.body.removeChild(link);
+  // }
+
+  const downloadAvatar = (data, name) => {
+    axios
+      .post('/api/download', { data, name })
+      .then((res) => saveAs(res.data.image, res.data.name));
+  };
 
   return (
     <div className="h-screen flex justify-center items-center">
@@ -173,10 +208,16 @@ function FrameImage() {
           {/*)}*/}
           {downloadableContent && (
             <button
+              // href={downloadableContent.link}
+              // download
               onClick={() =>
-                saveAs(downloadableContent.link, downloadableContent.name)
+                // downloadBlob(downloadableContent.link, downloadableContent.name)
+                downloadAvatar(
+                  downloadableContent.link,
+                  downloadableContent.name,
+                )
               }
-              className="bg-green-400 hover:bg-green-700 hover:text-white h-px-36 text-sm text-gray-500 text-violet-700 font-semibold py-2 px-4 rounded-full"
+              className="cursor-pointer bg-green-400 hover:bg-green-700 hover:text-white h-px-36 text-sm text-gray-500 text-violet-700 font-semibold py-2 px-4 rounded-full"
             >
               Download
             </button>
