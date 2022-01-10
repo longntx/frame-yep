@@ -12,14 +12,38 @@
     height: 100vh;
   }
   .frame {
-    @apply w-480 h-480 bg-sky-500/[.06];
-    background-image: url(../public/images/Frame_Facebook_YEPEst2021-03.png);
+    @apply bg-sky-500/[.06];
+    background-image: url(../public/images/1080_Frame_Facebook_YEPEst2021-03.png);
+    background-size: contain;
+    pointer-events: none;
+    z-index: 11;
+  }
+  .rs-frame{
+    @apply bg-sky-500/[.06];
+    background-image: url(../public/images/Frame_Facebook_YEPRS_1080px.png);
     background-size: contain;
     pointer-events: none;
     z-index: 11;
   }
   .sample-canvas {
-    @apply w-480 h-480;
     z-index: 10;
   }
+}
+
+input[type='radio'] + label span {
+  transition: background 0.2s, transform 0.2s;
+}
+
+input[type='radio'] + label span:hover,
+input[type='radio'] + label:hover span {
+  transform: scale(1.2);
+}
+
+input[type='radio']:checked + label span {
+  background-color: rgb(109 39 217);
+  box-shadow: 0px 0px 0px 2px white inset;
+}
+
+input[type='radio']:checked + label {
+  color: rgb(109 39 217);
 }

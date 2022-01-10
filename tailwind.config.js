@@ -15,6 +15,13 @@ module.exports = {
       padding: {
         20: '20rem',
       },
+      screens: {
+        'xsm': {'max': '404px'},
+        'xx-sm': {'max': '310px'},
+      },
+    },
+    minHeight: {
+      300: '300px',
     },
   },
   plugins: [],
