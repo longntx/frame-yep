@@ -3,8 +3,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useDebounceFn, useMemoizedFn } from 'ahooks';
 import { fabric } from 'fabric';
 import Canvas from '../Canvas';
-import axios from 'axios';
-import { saveAs } from 'file-saver';
+// import axios from 'axios';
+// import { saveAs } from 'file-saver';
+import streamSaver from 'streamsaver';
 
 function FrameImage() {
   const ER_BACKGROUND = 'images/1080_Frame_Facebook_YEPEst2021-03.png';
@@ -32,6 +33,28 @@ function FrameImage() {
       fileRef.current = null;
     }
   });
+
+  const convertBase64ToBlob = (base64Image) => {
+    // Split into two parts
+    const parts = base64Image.split(';base64,');
+
+    // Hold the content type
+    const imageType = parts[0].split(':')[1];
+
+    // Decode Base64 string
+    const decodedData = window.atob(parts[1]);
+
+    // Create UNIT8ARRAY of size same as row data length
+    const uInt8Array = new Uint8Array(decodedData.length);
+
+    // Insert all character code into uInt8Array
+    for (let i = 0; i < decodedData.length; ++i) {
+      uInt8Array[i] = decodedData.charCodeAt(i);
+    }
+
+    // Return BLOB image after conversion
+    return new Blob([uInt8Array], { type: imageType });
+  };
 
   const addImageToCanvasFromUrl = (editorObj, url, isDownloading) => {
     const imgObj = new Image();
@@ -123,9 +146,38 @@ function FrameImage() {
   // }
 
   const downloadAvatar = (data, name) => {
-    axios
-      .post('/api/download', { data, name })
-      .then((res) => saveAs(res.data.image, res.data.name));
+    const blob = convertBase64ToBlob(data);
+    // axios.post('/api/download', { data, name }).then((res) => console.log(res));
+    const fileStream = streamSaver.createWriteStream(`${name}.png`, {
+      size: blob.size, // Makes the percentage visiable in the download
+    });
+
+    // One quick alternetive way if you don't want the hole blob.js thing:
+    // const readableStream = new Response(
+    //   Blob || String || ArrayBuffer || ArrayBufferView
+    // ).body
+    const readableStream = blob.stream();
+
+    // more optimized pipe version
+    // (Safari may have pipeTo but it's useless without the WritableStream)
+    if (window.WritableStream && readableStream.pipeTo) {
+      return readableStream
+        .pipeTo(fileStream)
+        .then(() => console.log('done writing'));
+    }
+
+    // Write (pipe) manually
+    window.writer = fileStream.getWriter();
+
+    const reader = readableStream.getReader();
+    const pump = () =>
+      reader
+        .read()
+        .then((res) =>
+          res.done ? writer.close() : writer.write(res.value).then(pump),
+        );
+
+    pump();
   };
 
   return (

@@ -5,7 +5,9 @@ export default function handler(req, res) {
       'content-disposition',
       `attachment; filename=${req?.body.name}`,
     );
-    res.status(200).send({ image: req?.body.data, name: req?.body.name });
+    res.setHeader('content-type', 'image/png');
+    const base64content = req.body.data.replace(/^data:image\/png;base64,/, '');
+    res.status(200).send(base64content);
   } else {
     // Handle any other HTTP method
   }
